@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c0d3 JS3 Challenge 10</title>
+  </head>
+  <body>
+    <button class="prev">Previous</button>
+    <button class="next">Next</button>
+    <div class="display"></div>
+
+    <script>
+      const prevBtn = document.querySelector(".prev");
+      const nextBtn = document.querySelector(".next");
+      const display = document.querySelector(".display");
+      let previousUrl = null;
+      let nextUrl = null;
+
+      const url = "https://pokeapi.co/api/v2/pokemon";
+
+      const fetchPokemonData = (url) => {
+        fetch(url)
+          .then((res) => res.json())
+          .then((data) => {
+            previousUrl = data.previous;
+            nextUrl = data.next;
+
+            const fetchPromises = data.results.map((pokemon) => {
+              const pokemonName = pokemon.name;
+              return fetch(pokemon.url)
+                .then((pokeRes) => pokeRes.json())
+                .then((data) => {
+                  return {
+                    name: pokemonName,
+                    pic: data.sprites.front_default,
+                  };
+                });
+            });
+
+            return Promise.all(fetchPromises);
+          })
+          .then((pokemonList) => {
+            const htmlStr = pokemonList.reduce((acc, poke) => {
+              return `${acc}<div><h1>${poke.name}</h1><img src="${poke.pic}"/></div>`;
+            }, "");
+
+            display.innerHTML = htmlStr;
+          });
+      };
+
+      prevBtn.onclick = () => {
+        if (previousUrl) fetchPokemonData(previousUrl);
+      };
+
+      nextBtn.onclick = () => {
+        if (nextUrl) fetchPokemonData(nextUrl);
+      };
+
+      fetchPokemonData(url);
+    </script>
+  </body>
+</html>

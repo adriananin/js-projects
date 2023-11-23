@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lights Off</title>
+
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      #container {
+        --colCount: 0;
+        display: grid;
+        gap: 0.15em;
+        grid-template-columns: repeat(var(--colCount), 50px);
+      }
+
+      .light {
+        width: 50px;
+        height: 50px;
+        border: solid 1px black;
+        display: inline-block;
+        background-color: grey;
+        cursor: pointer;
+      }
+
+      .light.selected {
+        background-color: plum;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+
+    <script>
+      let initialState;
+      let isInitialBlockSet = false;
+      const container = document.querySelector("#container");
+
+      class Block {
+        constructor(row, col) {
+          this.row = row;
+          this.col = col;
+          this.state = initialState;
+          this.element = document.createElement("div");
+          this.element.className = "light";
+          this.element.addEventListener("click", () => this.handleClick());
+
+          document.getElementById("container").appendChild(this.element);
+          this.render();
+        }
+
+        render() {
+          this.element.classList.toggle("selected", this.state);
+        }
+
+        handleClick() {
+          if (this.state) {
+            this.toggleState();
+            this.updateAdjacentLights();
+            if (this.checkForVictory()) {
+              alert("Congratulations! You've won!");
+              restartGame();
+            }
+          }
+        }
+
+        toggleState() {
+          this.state = !this.state;
+          this.render();
+        }
+
+        updateAdjacentLights() {
+          const adjacentOffsets = [
+            { row: -1, col: 0 }, // Up
+            { row: 1, col: 0 }, // Down
+            { row: 0, col: -1 }, // Left
+            { row: 0, col: 1 }, // Right
+          ];
+
+          adjacentOffsets.forEach((offset) => {
+            const newRow = this.row + offset.row;
+            const newCol = this.col + offset.col;
+
+            const validRow = newRow >= 0 && newRow < rows;
+            const validCol = newCol >= 0 && newCol < cols;
+            const blockExists = blocks[newRow] && blocks[newRow][newCol];
+
+            if (validRow && validCol && blockExists) {
+              blocks[newRow][newCol].toggleState();
+            }
+          });
+        }
+
+        checkForVictory() {
+          return this.checkVictory();
+        }
+
+        checkVictory(row = 0, col = 0) {
+          if (row === rows) return true;
+
+          if (blocks[row][col].state) return false;
+
+          if (col === cols - 1) return this.checkVictory(row + 1, 0);
+
+          return this.checkVictory(row, col + 1);
+        }
+      }
+
+      let rows = 2;
+      let cols = 2;
+      const blocks = [];
+
+      const createBlocks = (row, col) => {
+        if (row >= rows) return;
+
+        if (!blocks[row]) blocks[row] = [];
+
+        if (col >= cols) return createBlocks(row + 1, 0);
+
+        // handle initial light on
+        initialState = !isInitialBlockSet && Math.random() < 0.5;
+
+        const block = new Block(row, col);
+        blocks[row][col] = block;
+
+        if (initialState) isInitialBlockSet = true;
+
+        return createBlocks(row, col + 1);
+      };
+
+      createBlocks(0, 0);
+
+      const restartGame = () => {
+        const newRows = parseInt(prompt("Enter the number of rows:"));
+        container.innerHTML = "";
+        isInitialBlockSet = false;
+        blocks.length = 0;
+        rows = newRows || 2;
+        cols = newRows || 2;
+        createBlocks(0, 0);
+        container.style.setProperty("--colCount", `${rows}`);
+      };
+
+      container.style.setProperty("--colCount", `${rows}`);
+    </script>
+  </body>
+</html>

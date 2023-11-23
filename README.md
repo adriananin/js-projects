@@ -1,3 +1,3 @@
-# Pokemon Fetch
+# Mini Projects
 
-This mini-project was built to pratice Promises and using the Fetch API.
+Projects built with Javascript to practice various Javascript concepts.

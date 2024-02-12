@@ -1,0 +1,108 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+}
+
+body {
+  background-color: rgba(255, 165, 0, 0.4);
+  font-family: monospace;
+}
+
+#container {
+  margin-top: 30px;
+  margin-left: 30px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1em;
+}
+
+.card {
+  width: 350px;
+}
+
+.heading {
+  color: white;
+  width: 100%;
+  padding: 0.75em;
+  text-align: center;
+}
+
+.display > * {
+  padding: 1em;
+  background-color: #eee;
+}
+
+.display > * + * {
+  margin-top: 5px;
+}
+
+textarea {
+  background-color: orange;
+  border-bottom-left-radius: 10px;
+}
+
+.add button {
+  background-color: rgb(62, 62, 62);
+  color: orange;
+  border: none;
+  border-bottom-right-radius: 10px;
+  cursor: pointer;
+}
+
+#undo-btn {
+  position: fixed;
+  padding: 20px;
+  bottom: 0;
+  right: 0;
+  background-color: rgb(62, 62, 62);
+  border-top-left-radius: 10px;
+  color: orange;
+  border: none;
+  cursor: pointer;
+}
+
+.item h3 {
+  cursor: pointer;
+}
+
+.add {
+  display: flex;
+}
+
+.display {
+  text-align: center;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background-color: orange;
+}
+
+.todo .heading {
+  background-color: #35235d;
+}
+
+.doing .heading {
+  background-color: #cb2402;
+}
+
+.done .heading {
+  background-color: #4c49a2;
+}
+
+.approved .heading {
+  background-color: #a31a48;
+}
+
+.arrow {
+  cursor: pointer;
+}
+
+.card-wrapper {
+  border-radius: 10px;
+}

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kanban Board</title>
+
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      * {
+        margin: 0;
+      }
+
+      body {
+        background-color: plum;
+        font-family: monospace;
+      }
+
+      #container {
+        margin-top: 30px;
+        margin-left: 30px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1em;
+      }
+
+      .card {
+        width: 350px;
+      }
+
+      .heading {
+        color: white;
+        width: 100%;
+        padding: 0.75em;
+        text-align: center;
+      }
+
+      .display > * {
+        padding: 1em;
+        background-color: #eee;
+      }
+
+      .display > * + * {
+        margin-top: 5px;
+      }
+
+      .add {
+        display: flex;
+      }
+
+      .display {
+        text-align: center;
+      }
+
+      .item {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .todo .heading {
+        background-color: #35235d;
+      }
+
+      .doing .heading {
+        background-color: #cb2402;
+      }
+
+      .done .heading {
+        background-color: #4c49a2;
+      }
+      .approved .heading {
+        background-color: #a31a48;
+      }
+
+      .arrow {
+        cursor: pointer;
+      }
+
+      .card-wrapper {
+        border-radius: 10px;
+      }
+
+      #undo-btn {
+        position: fixed;
+        padding: 20px;
+        bottom: 0;
+        right: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+    <button id="undo-btn">UNDO</button>
+
+    <script>
+      const undo = document.querySelector("#undo-btn");
+      const container = document.querySelector("#container");
+
+      const titles = [
+        { name: "Todo", class: "todo" },
+        { name: "Doing", class: "doing" },
+        { name: "Done", class: "done" },
+        { name: "Approved", class: "approved" },
+      ];
+
+      const actions = [];
+      let boards;
+
+      let appData = JSON.parse(
+        localStorage.getItem("items") || "[[],[],[],[]]"
+      );
+
+      const captureState = () => {
+        const boardData = boards.map((board) => {
+          return board.getData();
+        });
+
+        actions.push({
+          data: JSON.stringify(boardData),
+        });
+      };
+
+      class Todo {
+        constructor(wrapper, boardId, text) {
+          const element = document.createElement("div");
+          element.classList.add("item");
+          let left = `<div class="left arrow">&lt;</div>`;
+          let right = `<div class="right arrow">&gt;</div>`;
+
+          if (boardId === 0) left = "";
+          if (boardId === 3) right = "";
+
+          element.innerHTML = `
+                ${left}
+                <h3>${text}</h3>
+                ${right}
+  `;
+
+          wrapper.append(element);
+
+          if (left) {
+            element.querySelector(".left").addEventListener("click", () => {
+              captureState();
+              boards[boardId - 1].addItem(text);
+              element.remove();
+              text = "";
+              storeBoardData();
+            });
+          }
+          if (right) {
+            element.querySelector(".right").addEventListener("click", () => {
+              captureState();
+              boards[boardId + 1].addItem(text);
+              element.remove();
+              text = "";
+              storeBoardData();
+            });
+          }
+
+          element.querySelector("h3").addEventListener("click", () => {
+            if (confirm(`Are you sure you want to delete ${text} ?`)) {
+              element.remove();
+              text = "";
+            }
+            storeBoardData();
+          });
+
+          this.getText = () => {
+            return text;
+          };
+
+          this.remove = () => {
+            text = "";
+            element.remove();
+          };
+        }
+      }
+
+      class Board {
+        constructor(i) {
+          const element = document.createElement("div");
+          element.classList.add("board", "card");
+          const title = titles[i];
+          element.innerHTML = `
+<div class="${title.class}">
+  <p class="heading">${title.name}</p>
+  <div class= "display"></div>
+  <div class="add">
+          <textarea name="" id="" cols="50" rows="4"></textarea>
+          <button class="doing-submit-btn">Submit</button>
+  </div>
+</div>
+`;
+          const todoWrapper = element.querySelector(".display");
+          const textarea = element.querySelector("textarea");
+          const button = element.querySelector("button");
+          button.addEventListener("click", () => {
+            let value = textarea.value;
+            if (!value) return;
+            captureState();
+            this.addItem(value);
+            textarea.value = "";
+            storeBoardData();
+          });
+
+          const data = appData[i];
+          const todoList = data.map((text) => {
+            return new Todo(todoWrapper, i, text);
+          });
+
+          this.addItem = (text) => {
+            todoList.push(new Todo(todoWrapper, i, text));
+          };
+
+          this.getData = () => {
+            const todoTextList = todoList.map((todo) => {
+              return todo.getText();
+            });
+            return todoTextList.filter((text) => {
+              return text;
+            });
+          };
+
+          this.removeItem = () => {
+            const todo = todoList.pop();
+            todo.remove();
+          };
+
+          container.append(element);
+        }
+      }
+
+      const storeBoardData = () => {
+        const boardData = boards.map((board) => {
+          return board.getData();
+        });
+        localStorage.setItem("items", JSON.stringify(boardData));
+      };
+
+      const render = () => {
+        container.innerHTML = "";
+        boards = [new Board(0), new Board(1), new Board(2), new Board(3)];
+      };
+
+      undo.addEventListener("click", () => {
+        const action = actions.pop();
+        console.log(action);
+
+        if (!action) return;
+
+        appData = JSON.parse(action.data);
+        render();
+        storeBoardData();
+      });
+
+      render();
+    </script>
+  </body>
+</html>

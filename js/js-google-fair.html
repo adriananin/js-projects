@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Google fair</title>
+
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      * {
+        margin: 0;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .container {
+        position: relative;
+        cursor: none;
+      }
+
+      .scope {
+        display: none;
+        pointer-events: none;
+        position: absolute;
+        transform: translate(-50%, -50%);
+        background: url("https://www.c0d3.com/challenges/assets/fair/big.jpg");
+        clip-path: circle(99px at center);
+        background-repeat: no-repeat;
+      }
+
+      .smallImg {
+        overflow: hidden;
+        position: relative;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="smallImg">
+        <img
+          src="https://www.c0d3.com/challenges/assets/fair/small.jpg"
+          alt=""
+        />
+      </div>
+
+      <div class="scope">
+        <img
+          class="scopeImg"
+          src="https://www.c0d3.com/challenges/assets/fair/scope.png"
+          alt=""
+        />
+      </div>
+    </div>
+
+    <script>
+      const container = document.querySelector(".container");
+      const scope = document.querySelector(".scope");
+
+      const xRatio = 1263 / 421;
+      const yRatio = 503 / 168;
+
+      container.addEventListener("mousemove", (e) => {
+        const x = e.clientX - container.getBoundingClientRect().left;
+        const y = e.clientY - container.getBoundingClientRect().top;
+
+        scope.style.display = "block";
+
+        scope.style.left = `${x}px`;
+        scope.style.top = `${y}px`;
+
+        scope.style.backgroundPositionX = `${-1 * x * xRatio + 100}px`;
+        scope.style.backgroundPositionY = `${-1 * y * yRatio + 100}px`;
+      });
+
+      container.addEventListener("mouseleave", () => {
+        scope.style.display = "none";
+      });
+    </script>
+  </body>
+</html>
